@@ -1,11 +1,11 @@
 [package]
 name = "drm-fourcc"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Daniel Franklin <daniel@danielzfranklin.org>"]
 edition = "2018"
 license = "MIT"
 description = "Provides an enum with every valid Direct Rendering Manager (DRM) format fourcc"
-repository = "https://github.com/danielzfranklin/evdi-rs"
+repository = "https://github.com/danielzfranklin/drm-fourcc-rs"
 keywords = ["drm", "fourcc", "linux"]
 categories = ["os::linux-apis"]
 
