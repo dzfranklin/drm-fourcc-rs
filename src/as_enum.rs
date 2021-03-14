@@ -28,7 +28,6 @@ pub enum DrmFormat {
     C8 = consts::DRM_FOURCC_C8,
     Gr1616 = consts::DRM_FOURCC_GR1616,
     Gr88 = consts::DRM_FOURCC_GR88,
-    Invalid = consts::DRM_FOURCC_INVALID,
     Nv12 = consts::DRM_FOURCC_NV12,
     Nv16 = consts::DRM_FOURCC_NV16,
     Nv21 = consts::DRM_FOURCC_NV21,

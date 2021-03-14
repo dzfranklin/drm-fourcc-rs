@@ -42,7 +42,7 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     let names: Vec<(&str, &str)> = stdout
         .lines()
         .filter_map(|line| {
-            if line.contains("DRM_FORMAT_RESERVED") {
+            if line.contains("DRM_FORMAT_RESERVED") || line.contains("INVALID") {
                 return None;
             }
 
