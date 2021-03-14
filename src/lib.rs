@@ -91,6 +91,7 @@ impl TryFrom<u32> for DrmFormat {
 /// assert_eq!(UnrecognizedFourcc(828601953).string_form(), Some("avc1".to_string()));
 /// assert_eq!(UnrecognizedFourcc(0).string_form(), None);
 /// ```
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub struct UnrecognizedFourcc(pub u32);
 
 impl UnrecognizedFourcc {
@@ -191,5 +192,12 @@ pub mod tests {
             format!("{}", UnrecognizedFourcc(0)),
             "UnrecognizedFourcc(0)"
         );
+    }
+
+    #[test]
+    fn can_clone_result() {
+        let a = DrmFormat::try_from(0);
+        let b = a;
+        assert_eq!(a, b);
     }
 }
