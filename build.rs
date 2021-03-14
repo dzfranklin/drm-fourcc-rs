@@ -89,11 +89,32 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
         as_enum.write_all(b"#[repr(u32)]")?;
         as_enum.write_all(b"pub enum DrmFormat {\n")?;
 
-        for (_, short) in &names {
-            writeln!(as_enum, "{} = consts::{}{},", enum_member_case(short), const_prefix, short)?;
+        let members: Vec<(String, String)> = names
+            .iter()
+            .map(|(_, short)| {
+                (
+                    enum_member_case(short),
+                    format!("consts::{}{}", const_prefix, short),
+                )
+            })
+            .collect();
+
+        for (member, value) in &members {
+            writeln!(as_enum, "{} = {},", member, value)?;
         }
 
         as_enum.write_all(b"}\n")?;
+
+        as_enum.write_all(b"impl DrmFormat {\n")?;
+        as_enum.write_all(b"pub(crate) fn from_u32(n: u32) -> Option<Self> {\n")?;
+        as_enum.write_all(b"match n {\n")?;
+
+        for (member, value) in &members {
+            writeln!(as_enum, "{} => Some(Self::{}),", value, member)?;
+        }
+
+        writeln!(as_enum, "_ => None")?;
+        as_enum.write_all(b"}}}")?;
     }
 
     Command::new("rustfmt").arg(as_enum_path).spawn()?.wait()?;
