@@ -79,17 +79,22 @@ impl TryFrom<u32> for DrmFormat {
     }
 }
 
-pub struct UnrecognizedFourcc(u32);
+/// Wraps some u32 that isn't a DRM fourcc we recognize
+///
+/// ```
+/// # use drm_fourcc::{DrmFormat, UnrecognizedFourcc};
+/// # use std::convert::TryFrom;
+/// // Get the u32
+/// assert_eq!(UnrecognizedFourcc(42).0, 42);
+///
+/// // Get the string form
+/// assert_eq!(UnrecognizedFourcc(828601953).string_form(), Some("avc1".to_string()));
+/// assert_eq!(UnrecognizedFourcc(0).string_form(), None);
+/// ```
+pub struct UnrecognizedFourcc(pub u32);
 
 impl UnrecognizedFourcc {
     /// If the u32 is in a valid format to be a fourcc, get its string form.
-    ///
-    /// ```
-    /// # use drm_fourcc::DrmFormat;
-    /// # use std::convert::TryFrom;
-    /// assert_eq!(DrmFormat::try_from(828601953).unwrap_err().string_form(), Some("avc1".to_string()));
-    /// assert_eq!(DrmFormat::try_from(0).unwrap_err().string_form(), None);
-    /// ```
     pub fn string_form(&self) -> Option<String> {
         fourcc_string_form(self.0)
     }
