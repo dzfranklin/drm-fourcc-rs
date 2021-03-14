@@ -62,15 +62,10 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     wrapper.write_all(b"#include <stdint.h>\n")?;
     wrapper.write_all(b"#include <drm/drm_fourcc.h>\n")?;
 
-    let const_prefix = b"DRM_FOURCC_";
+    let const_prefix = "DRM_FOURCC_";
 
     for (full, short) in &names {
-        wrapper.write_all(b"uint32_t ")?;
-        wrapper.write_all(const_prefix)?;
-        wrapper.write_all(short.as_bytes())?;
-        wrapper.write_all(b" = ")?;
-        wrapper.write_all(full.as_bytes())?;
-        wrapper.write_all(b";\n")?;
+        writeln!(wrapper, "uint32_t {}{} = {};\n", const_prefix, short, full)?;
     }
 
     wrapper.flush()?;
@@ -95,12 +90,7 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
         as_enum.write_all(b"pub enum DrmFormat {\n")?;
 
         for (_, short) in &names {
-            as_enum.write_all(b"\t")?;
-            as_enum.write_all(enum_member_case(short).as_bytes())?;
-            as_enum.write_all(b" = consts::")?;
-            as_enum.write_all(const_prefix)?;
-            as_enum.write_all(short.as_bytes())?;
-            as_enum.write_all(b",\n")?;
+            writeln!(as_enum, "{} = consts::{}{},", enum_member_case(short), const_prefix, short)?;
         }
 
         as_enum.write_all(b"}\n")?;
