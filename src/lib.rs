@@ -1,4 +1,5 @@
 #![feature(try_trait)]
+#![allow(non_camel_case_types)]
 
 //! [`DrmFormat`] is an enum representing every pixel format supported by DRM
 //! (as of kernel version 5.8.0).
