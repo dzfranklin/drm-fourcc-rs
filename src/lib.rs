@@ -93,6 +93,7 @@ impl TryFrom<u32> for DrmFormat {
 /// assert_eq!(UnrecognizedFourcc(0).string_form(), None);
 /// ```
 #[derive(Copy, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnrecognizedFourcc(pub u32);
 
 impl UnrecognizedFourcc {
