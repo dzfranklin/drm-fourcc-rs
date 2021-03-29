@@ -47,19 +47,51 @@ mod generate {
 
         // Then get the names of the format macros
 
-        let re = Regex::new(r"^\s*#define (?P<full>DRM_FORMAT_(?P<short>[A-Z0-9_]+)) ")?;
-        let names: Vec<(&str, &str)> = stdout
+        let fmt_re = Regex::new(r"^\s*#define (?P<full>DRM_FORMAT_(?P<short>[A-Z0-9_]+)) ")?;
+        let format_names: Vec<(&str, &str)> = stdout
             .lines()
             .filter_map(|line| {
-                if line.contains("DRM_FORMAT_RESERVED") || line.contains("INVALID") {
+                if line.contains("DRM_FORMAT_RESERVED") || line.contains("INVALID") || line.contains("_MOD_") {
                     return None;
                 }
 
-                re.captures(line).map(|caps| {
+                fmt_re.captures(line).map(|caps| {
                     let full = caps.name("full").unwrap().as_str();
                     let short = caps.name("short").unwrap().as_str();
 
                     (full, short)
+                })
+            })
+            .collect();
+
+        let vendor_re = Regex::new(r"^\s*#define (?P<full>DRM_FORMAT_MOD_VENDOR_(?P<short>[A-Z0-9_]+)) ")?;
+        let vendor_names: Vec<(&str, &str)> = stdout
+            .lines()
+            .filter_map(|line| {
+                if line.contains("DRM_FORMAT_MOD_VENDOR_NONE") {
+                    return None;
+                }
+
+                vendor_re.captures(line).map(|caps| {
+                    let full = caps.name("full").unwrap().as_str();
+                    let short = caps.name("short").unwrap().as_str();
+
+                    (full, short)
+                })
+            })
+            .collect();
+
+        // Modifiers do not necessarily start with DRM_FORMAT_MOD
+        let mod_re = Regex::new(r"^\s*#define (?P<full>[A-Z0-9_]+?_MOD_[A-Z0-9_]+) ")?;
+        let modifier_names: Vec<&str> = stdout
+            .lines()
+            .filter_map(|line| {
+                if line.contains("DRM_FORMAT_MOD_NONE") || line.contains("DRM_FORMAT_MOD_RESERVED") || line.contains("VENDOR") {
+                    return None;
+                }
+
+                mod_re.captures(line).map(|caps| {
+                    caps.name("full").unwrap().as_str()
                 })
             })
             .collect();
@@ -73,8 +105,14 @@ mod generate {
 
         let const_prefix = "DRM_FOURCC_";
 
-        for (full, short) in &names {
+        for (full, short) in &format_names {
             writeln!(wrapper, "uint32_t {}{} = {};\n", const_prefix, short, full)?;
+        }
+        for (full, short) in &vendor_names {
+            writeln!(wrapper, "uint64_t {}{} = {};\n", const_prefix, short, full)?;
+        }
+        for full in &modifier_names {
+            writeln!(wrapper, "uint64_t {}{} = {};\n", const_prefix, full, full)?;
         }
 
         wrapper.flush()?;
@@ -101,7 +139,7 @@ mod generate {
             as_enum.write_all(b"#[repr(u32)]")?;
             as_enum.write_all(b"pub enum DrmFormat {\n")?;
 
-            let members: Vec<(String, String)> = names
+            let members: Vec<(String, String)> = format_names
                 .iter()
                 .map(|(_, short)| {
                     (
