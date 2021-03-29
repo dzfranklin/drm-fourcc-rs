@@ -1,5 +1,3 @@
-#![feature(with_options)]
-
 #[cfg(not(feature = "build_bindings"))]
 fn main() {
     println!("cargo:rerun-if-changed=build.rs"); // never rerun

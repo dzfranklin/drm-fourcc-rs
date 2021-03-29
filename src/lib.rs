@@ -1,4 +1,3 @@
-#![feature(try_trait)]
 #![allow(non_camel_case_types)]
 
 //! [`DrmFormat`] is an enum representing every pixel format supported by DRM
@@ -34,7 +33,6 @@ use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 
 pub use as_enum::DrmFormat;
-use std::option::NoneError;
 
 mod as_enum;
 mod consts;
@@ -124,7 +122,7 @@ impl Display for UnrecognizedFourcc {
 impl Error for UnrecognizedFourcc {}
 
 fn fourcc_string_form(fourcc: u32) -> Option<String> {
-    let string = String::from_utf8(fourcc.to_le_bytes().to_vec()).map_err(|_| NoneError)?;
+    let string = String::from_utf8(fourcc.to_le_bytes().to_vec()).ok()?;
 
     let mut out = String::new();
 
