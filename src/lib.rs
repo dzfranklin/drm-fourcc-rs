@@ -37,6 +37,13 @@ pub use as_enum::{DrmFourcc, DrmVendor, DrmModifier};
 mod as_enum;
 mod consts;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct DrmFormat {
+    pub code: DrmFourcc,
+    pub modifier: DrmModifier,
+}
+
 impl DrmFourcc {
     /// Get the string representation of the format's fourcc.
     pub fn string_form(&self) -> String {
