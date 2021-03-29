@@ -3,7 +3,7 @@ use crate::consts;
 #[derive(Copy, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u32)]
-pub enum DrmFormat {
+pub enum DrmFourcc {
     Abgr1555 = consts::DRM_FOURCC_ABGR1555,
     Abgr16161616f = consts::DRM_FOURCC_ABGR16161616F,
     Abgr2101010 = consts::DRM_FOURCC_ABGR2101010,
@@ -110,7 +110,7 @@ pub enum DrmFormat {
     Yvu444 = consts::DRM_FOURCC_YVU444,
     Yvyu = consts::DRM_FOURCC_YVYU,
 }
-impl DrmFormat {
+impl DrmFourcc {
     pub(crate) fn from_u32(n: u32) -> Option<Self> {
         match n {
             consts::DRM_FOURCC_ABGR1555 => Some(Self::Abgr1555),
