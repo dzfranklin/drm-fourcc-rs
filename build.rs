@@ -47,7 +47,7 @@ mod generate {
 
         // Then get the names of the format macros
 
-        let re = Regex::new(r"^\s*#define (?P<full>DRM_FORMAT_(?P<short>[A-Z0-9]+)) ")?;
+        let re = Regex::new(r"^\s*#define (?P<full>DRM_FORMAT_(?P<short>[A-Z0-9_]+)) ")?;
         let names: Vec<(&str, &str)> = stdout
             .lines()
             .filter_map(|line| {
