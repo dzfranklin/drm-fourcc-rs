@@ -32,7 +32,7 @@ use std::error::Error;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 
-pub use as_enum::DrmFormat;
+pub use as_enum::{DrmFormat, DrmVendor, DrmModifier};
 
 mod as_enum;
 mod consts;
@@ -147,6 +147,138 @@ fn fourcc_string_form(fourcc: u32) -> Option<String> {
     }
 
     Some(out)
+}
+
+impl TryFrom<u8> for DrmVendor {
+    type Error = UnrecognizedVendor;
+
+    /// Convert from an u8
+    ///
+    /// ```
+    /// # use drm_fourcc::DrmVendor;
+    /// # use std::convert::TryFrom;
+    /// assert_eq!(DrmVendor::try_from(2).unwrap(), DrmVendor::Amd);
+    ///
+    /// assert!(DrmVendor::try_from(0).is_err());
+    /// ```
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        Self::from_u8(value).ok_or(UnrecognizedVendor(value))
+    }
+}
+
+/// Wraps some u8 that isn't a DRM vendor we recognize
+///
+/// ```
+/// # use drm_fourcc::{DrmVendor, UnrecognizedVendor};
+/// # use std::convert::TryFrom;
+/// // Get the u8
+/// assert_eq!(UnrecognizedVendor(42).0, 42);
+/// ```
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct UnrecognizedVendor(pub u8);
+
+impl Display for UnrecognizedVendor {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        Debug::fmt(&self, f)
+    }
+}
+
+impl Error for UnrecognizedVendor {}
+
+impl From<u64> for DrmModifier {
+    /// Convert from an u64
+    ///
+    /// ```
+    /// # use drm_fourcc::DrmModifier;
+    /// assert_eq!(DrmModifier::from(0), DrmModifier::Linear);
+    /// ```
+    fn from(value: u64) -> Self {
+        Self::from_u64(value)
+    }
+}
+
+/// Wraps some u64 that isn't a DRM modifier we recognize
+///
+/// ```
+/// # use drm_fourcc::{DrmModifier, UnrecognizedModifier};
+/// # use std::convert::TryFrom;
+/// // Get the u64
+/// assert_eq!(UnrecognizedModifier(42).0, 42);
+/// ```
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct UnrecognizedModifier(pub u64);
+
+impl Display for UnrecognizedModifier {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        Debug::fmt(&self, f)
+    }
+}
+
+impl Error for UnrecognizedModifier {}
+
+impl UnrecognizedModifier {
+    /// Get the vendor of the unrecognized modifier, if any
+    ///
+    /// ```
+    /// # use drm_fourcc::{DrmModifier, DrmVendor, UnrecognizedModifier, UnrecognizedVendor};
+    /// assert_eq!(UnrecognizedModifier(216172782113783827).vendor(), Ok(Some(DrmVendor::Nvidia)));
+    /// assert_eq!(UnrecognizedModifier(2).vendor(), Ok(None));
+    /// assert_eq!(UnrecognizedModifier(8646911284551352320).vendor(), Err(UnrecognizedVendor(120)));
+    /// ```
+    pub fn vendor(&self) -> Result<Option<DrmVendor>, UnrecognizedVendor> {
+        let vendor = (self.0 >> 56) as u8;
+        if vendor == 0 {
+            Ok(None)
+        } else {
+            DrmVendor::try_from(vendor).map(|x| Some(x))
+        }
+    }
+}
+
+impl Into<u64> for DrmModifier {
+    /// Convert to an u64
+    ///
+    /// ```
+    /// # use drm_fourcc::DrmModifier;
+    /// assert_eq!(0u64, DrmModifier::Linear.into());
+    /// ```
+    fn into(self) -> u64 {
+        self.into_u64()
+    }
+}
+
+impl PartialEq for DrmModifier {
+    fn eq(&self, other: &Self) -> bool {
+        self.into_u64() == other.into_u64()
+    }
+}
+impl Eq for DrmModifier {}
+
+impl PartialEq<u64> for DrmModifier {
+    fn eq(&self, other: &u64) -> bool {
+        &self.into_u64() == other
+    }
+}
+
+impl DrmModifier {
+    /// Get the vendor of the modifier, if any
+    ///
+    /// ```
+    /// # use drm_fourcc::{DrmModifier, DrmVendor, UnrecognizedVendor};
+    /// assert_eq!(DrmModifier::I915_x_tiled.vendor(), Ok(Some(DrmVendor::Intel)));
+    /// assert_eq!(DrmModifier::Linear.vendor(), Ok(None));
+    /// assert_eq!(DrmModifier::Unrecognized(8646911284551352320).vendor(), Err(UnrecognizedVendor(120)));
+    /// ```
+    pub fn vendor(&self) -> Result<Option<DrmVendor>, UnrecognizedVendor> {
+        let vendor = (self.into_u64() >> 56) as u8;
+        if vendor == 0 {
+            Ok(None)
+        } else {
+            DrmVendor::try_from(vendor).map(|x| Some(x))
+        }
+    }
 }
 
 #[cfg(test)]
