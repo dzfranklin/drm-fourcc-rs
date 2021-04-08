@@ -47,13 +47,14 @@ use std::convert::TryFrom;
 use std::error::Error;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
+use std::hash::{Hash, Hasher};
 
 pub use as_enum::{DrmFourcc, DrmVendor, DrmModifier};
 
 mod as_enum;
 mod consts;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DrmFormat {
     pub code: DrmFourcc,
@@ -282,6 +283,12 @@ impl Eq for DrmModifier {}
 impl PartialEq<u64> for DrmModifier {
     fn eq(&self, other: &u64) -> bool {
         &self.into_u64() == other
+    }
+}
+
+impl Hash for DrmModifier {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.into_u64().hash(state);
     }
 }
 

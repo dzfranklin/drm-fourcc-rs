@@ -137,7 +137,7 @@ mod generate {
 
         // Then generate our enums
         fn write_enum(as_enum: &mut File, name: &str, repr: &str, names: Vec<(&str, &str)>) -> Result<(), std::io::Error> {
-            as_enum.write_all(b"#[derive(Copy, Clone, Eq, PartialEq)]")?;
+            as_enum.write_all(b"#[derive(Copy, Clone, Eq, PartialEq, Hash)]")?;
             as_enum.write_all(
                 b"#[cfg_attr(feature = \"serde\", derive(serde::Serialize, serde::Deserialize))]",
             )?;
