@@ -5,7 +5,9 @@
 //!
 //! A [fourcc][fourcc_wiki] is four bytes of ascii representing some data format. This enum contains
 //! every fourcc representing a pixel format supported by [DRM][drm_wiki], the Linux Direct
-//! Rendering Manager.
+//! Rendering Manager. The names of pixel formats generally provide clues as to
+//! how they work, for more information you may find
+//! [this guide][drm_format_guide] helpful.
 //!
 //! To get the bytes of the fourcc representing the format, cast to `u32`.
 //!
