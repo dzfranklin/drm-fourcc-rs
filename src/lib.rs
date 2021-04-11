@@ -1,4 +1,5 @@
 #![allow(non_camel_case_types)]
+#![warn(clippy::cargo)]
 
 //! [`DrmFourcc`] is an enum representing every pixel format supported by DRM
 //! (as of kernel version 5.10.0).
@@ -44,6 +45,7 @@
 //! [fourcc_wiki]: https://en.wikipedia.org/wiki/FourCC
 //! [drm_wiki]: https://en.wikipedia.org/wiki/Direct_Rendering_Managerz
 //! [canonical]: https://github.com/torvalds/linux/blame/master/include/uapi/drm/drm_fourcc.h
+//! [drm_format_guide]: https://afrantzis.com/pixel-format-guide/drm.html
 
 use std::convert::TryFrom;
 use std::error::Error;
@@ -51,7 +53,7 @@ use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
 
-pub use as_enum::{DrmFourcc, DrmVendor, DrmModifier};
+pub use as_enum::{DrmFourcc, DrmModifier, DrmVendor};
 
 mod as_enum;
 mod consts;
