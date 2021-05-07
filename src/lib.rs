@@ -155,10 +155,9 @@ fn fourcc_string_form(fourcc: u32) -> Option<String> {
     let mut out = String::new();
 
     let chars: Vec<char> = string.chars().collect();
-    let (start, last_chars) = chars.split_at(3);
-    let last = last_chars[0];
+    let (start, end) = chars.split_at(2);
 
-    // first three bytes must be characters
+    // first two bytes must be characters
     for char in start {
         if char.is_ascii_alphanumeric() {
             out.push(*char);
@@ -167,11 +166,13 @@ fn fourcc_string_form(fourcc: u32) -> Option<String> {
         }
     }
 
-    // last byte is allowed to be null
-    if last == '\0' {
-        out.push(' ');
-    } else {
-        out.push(last);
+    // last two are allowed to be null
+    for char in end {
+        if *char == '\0' {
+            out.push(' ');
+        } else {
+            out.push(*char);
+        }
     }
 
     Some(out)
