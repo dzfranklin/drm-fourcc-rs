@@ -1,6 +1,6 @@
 #![allow(non_camel_case_types)]
 #![warn(clippy::cargo)]
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 //! [`DrmFourcc`] is an enum representing every pixel format supported by DRM
 //! (as of kernel version 5.10.0).
@@ -47,14 +47,13 @@
 //! [drm_wiki]: https://en.wikipedia.org/wiki/Direct_Rendering_Managerz
 //! [canonical]: https://github.com/torvalds/linux/blame/master/include/uapi/drm/drm_fourcc.h
 //! [drm_format_guide]: https://afrantzis.com/pixel-format-guide/drm.html
-extern crate alloc;
-
 use core::convert::TryFrom;
 use core::fmt;
 use core::fmt::{Debug, Display, Formatter};
 use core::hash::{Hash, Hasher};
 
-use alloc::string::{String, ToString};
+#[cfg(feature = "std")]
+use std::string::{String, ToString};
 
 #[cfg(feature = "std")]
 use std::error::Error;
@@ -72,6 +71,12 @@ pub struct DrmFormat {
 }
 
 impl DrmFourcc {
+    /// Get the string representation of the format's fourcc.
+    #[cfg(feature = "std")]
+    pub fn string_form(&self) -> String {
+        self.display_form().to_string()
+    }
+
     // Internal helper to clarify it always has Display.
     fn display_form(&self) -> impl Display + Debug {
         fourcc_display_form(*self as u32).expect("Must be valid fourcc")
@@ -97,7 +102,8 @@ impl TryFrom<u32> for DrmFourcc {
 
     /// Convert from an u32
     ///
-    /// ```
+    #[cfg_attr(feature = "std", doc="```")]
+    #[cfg_attr(not(feature = "std"), doc="```ignore")]
     /// # use drm_fourcc::DrmFourcc;
     /// # use std::convert::TryFrom;
     /// assert_eq!(DrmFourcc::try_from(875710274).unwrap(), DrmFourcc::Bgr888);
@@ -114,7 +120,8 @@ impl TryFrom<u32> for DrmFourcc {
 
 /// Wraps some u32 that isn't a DRM fourcc we recognize
 ///
-/// ```
+#[cfg_attr(feature = "std", doc="```")]
+#[cfg_attr(not(feature = "std"), doc="```ignore")]
 /// # use drm_fourcc::{DrmFourcc, UnrecognizedFourcc};
 /// # use std::convert::TryFrom;
 /// // Get the u32
@@ -130,8 +137,26 @@ pub struct UnrecognizedFourcc(pub u32);
 
 impl UnrecognizedFourcc {
     /// If the u32 is in a valid format to be a fourcc, get its string form.
+    ///
+    /// Note that this requires the `std` feature to be enabled. The [`display`] method is an
+    /// alternative that does not require this dependency.
+    #[cfg(feature = "std")]
     pub fn string_form(&self) -> Option<String> {
         fourcc_string_form(self.0)
+    }
+
+    /// If the u32 is in a valid format to be a fourcc, get an opaque type to display it.
+    ///
+    /// This can be treated as a slightly generalized form of [`string_form`] that is also
+    /// available when the crate does not depend on the standard or `alloc` crate.
+    ///
+    /// ```
+    /// # use drm_fourcc::UnrecognizedFourcc;
+    /// assert!(UnrecognizedFourcc(828601953).display().is_some());
+    /// assert!(UnrecognizedFourcc(0).display().is_none());
+    /// ```
+    pub fn display(&self) -> Option<impl Display> {
+        fourcc_display_form(self.0)
     }
 }
 
@@ -139,7 +164,7 @@ impl Debug for UnrecognizedFourcc {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut debug = &mut f.debug_tuple("UnrecognizedFourcc");
 
-        if let Some(string_form) = self.string_form() {
+        if let Some(string_form) = fourcc_display_form(self.0) {
             debug = debug.field(&string_form);
         }
 
@@ -156,6 +181,7 @@ impl Display for UnrecognizedFourcc {
 #[cfg(feature = "std")]
 impl Error for UnrecognizedFourcc {}
 
+#[cfg(feature = "std")]
 fn fourcc_string_form(fourcc: u32) -> Option<String> {
     fourcc_display_form(fourcc).map(|val| val.to_string())
 }
@@ -174,16 +200,20 @@ fn fourcc_display_form(fourcc: u32) -> Option<impl Display + Debug> {
         }
     }
 
-    struct FormatFourccRaw {
-        bytes: [u8; 4],
-    }
-
     let mut bytes = raw_bytes;
     // Bytes in tail are allowed to be NUL
     for byte in &mut bytes[4 - chars.as_str().len()..] {
         if *byte == b'\0' {
             *byte = b' ';
         }
+    }
+
+    /// A pre-formatted string representing a valid FourCC format.
+    ///
+    /// This differs from the byte representation only in that NUL-characters beyond the leading
+    /// two have been replaced by spaces.
+    struct FormatFourccRaw {
+        bytes: [u8; 4],
     }
 
     impl Display for FormatFourccRaw {
@@ -355,7 +385,6 @@ pub(crate) mod _fake_ctypes {
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use alloc::string::ToString;
 
     #[test]
     fn a_specific_var_has_correct_value() {
@@ -371,11 +400,13 @@ pub mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn enum_member_has_correct_string_format() {
         assert_eq!(DrmFourcc::Xrgb8888.to_string(), "XR24");
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn fourcc_string_form_handles_valid() {
         assert_eq!(fourcc_string_form(875713112).unwrap(), "XR24");
         assert_eq!(fourcc_string_form(828601953).unwrap(), "avc1");
@@ -383,14 +414,16 @@ pub mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn unrecognized_handles_valid_fourcc() {
         assert_eq!(
             UnrecognizedFourcc(828601953).to_string(),
-            "UnrecognizedFourcc(\"avc1\", 828601953)"
+            "UnrecognizedFourcc(avc1, 828601953)"
         );
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn unrecognized_handles_invalid_fourcc() {
         assert_eq!(UnrecognizedFourcc(0).to_string(), "UnrecognizedFourcc(0)");
     }
