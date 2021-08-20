@@ -74,8 +74,7 @@ pub struct DrmFormat {
 impl DrmFourcc {
     // Internal helper to clarify it always has Display.
     fn display_form(&self) -> impl Display + Debug {
-        fourcc_display_form(*self as u32)
-            .expect("Must be valid fourcc")
+        fourcc_display_form(*self as u32).expect("Must be valid fourcc")
     }
 }
 
@@ -163,9 +162,7 @@ fn fourcc_string_form(fourcc: u32) -> Option<String> {
 
 fn fourcc_display_form(fourcc: u32) -> Option<impl Display + Debug> {
     let raw_bytes = fourcc.to_le_bytes();
-    let mut chars = ::core::str::from_utf8(&raw_bytes)
-        .ok()?
-        .chars();
+    let mut chars = ::core::str::from_utf8(&raw_bytes).ok()?.chars();
 
     let first = chars.next().unwrap();
     let second = chars.next().unwrap();
@@ -191,8 +188,7 @@ fn fourcc_display_form(fourcc: u32) -> Option<impl Display + Debug> {
 
     impl Display for FormatFourccRaw {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            let chars = ::core::str::from_utf8(&self.bytes[..])
-                .expect("validated previously");
+            let chars = ::core::str::from_utf8(&self.bytes[..]).expect("validated previously");
             f.write_str(chars)
         }
     }
@@ -203,9 +199,7 @@ fn fourcc_display_form(fourcc: u32) -> Option<impl Display + Debug> {
         }
     }
 
-    Some(FormatFourccRaw {
-        bytes,
-    })
+    Some(FormatFourccRaw { bytes })
 }
 
 impl TryFrom<u8> for DrmVendor {
@@ -348,6 +342,16 @@ impl DrmModifier {
     }
 }
 
+// Bindgen will always insert `use` statements for these types even though we seriously never use
+// them in normal compilation. Instead, we only use fixed-size types that translate to pure Rust
+// types.
+#[allow(dead_code)]
+pub(crate) mod _fake_ctypes {
+    pub struct c_uchar;
+    pub struct c_uint;
+    pub struct c_ulong;
+}
+
 #[cfg(test)]
 pub mod tests {
     use super::*;
@@ -388,10 +392,7 @@ pub mod tests {
 
     #[test]
     fn unrecognized_handles_invalid_fourcc() {
-        assert_eq!(
-            UnrecognizedFourcc(0).to_string(),
-            "UnrecognizedFourcc(0)"
-        );
+        assert_eq!(UnrecognizedFourcc(0).to_string(), "UnrecognizedFourcc(0)");
     }
 
     #[test]

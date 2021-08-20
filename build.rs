@@ -129,6 +129,7 @@ mod generate {
 
         // Then generate bindings from that file
         bindgen::builder()
+            .ctypes_prefix("crate::_fake_ctypes")
             .header(wrapper_path.as_os_str().to_str().unwrap())
             .whitelist_var("DRM_FOURCC_.*")
             .generate()
