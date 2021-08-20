@@ -1,5 +1,6 @@
 #![allow(non_camel_case_types)]
 #![warn(clippy::cargo)]
+#![no_std]
 
 //! [`DrmFourcc`] is an enum representing every pixel format supported by DRM
 //! (as of kernel version 5.10.0).
@@ -46,12 +47,17 @@
 //! [drm_wiki]: https://en.wikipedia.org/wiki/Direct_Rendering_Managerz
 //! [canonical]: https://github.com/torvalds/linux/blame/master/include/uapi/drm/drm_fourcc.h
 //! [drm_format_guide]: https://afrantzis.com/pixel-format-guide/drm.html
+extern crate alloc;
 
-use std::convert::TryFrom;
+use core::convert::TryFrom;
+use core::fmt;
+use core::fmt::{Debug, Display, Formatter};
+use core::hash::{Hash, Hasher};
+
+use alloc::string::{String, ToString};
+
+#[cfg(feature = "std")]
 use std::error::Error;
-use std::fmt;
-use std::fmt::{Debug, Display, Formatter};
-use std::hash::{Hash, Hasher};
 
 pub use as_enum::{DrmFourcc, DrmModifier, DrmVendor};
 
@@ -66,25 +72,24 @@ pub struct DrmFormat {
 }
 
 impl DrmFourcc {
-    /// Get the string representation of the format's fourcc.
-    pub fn string_form(&self) -> String {
-        fourcc_string_form(*self as u32).expect("Must be valid fourcc")
+    // Internal helper to clarify it always has Display.
+    fn display_form(&self) -> impl Display + Debug {
+        fourcc_display_form(*self as u32)
+            .expect("Must be valid fourcc")
     }
 }
 
 impl Debug for DrmFourcc {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_tuple("DrmFourcc")
-            .field(&self.string_form())
+            .field(&self.display_form())
             .finish()
     }
 }
 
 impl Display for DrmFourcc {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        fourcc_display_form(*self as u32)
-            .expect("Must be valid fourcc")
-            .fmt(f)
+        Display::fmt(&self.display_form(), f)
     }
 }
 
@@ -149,13 +154,14 @@ impl Display for UnrecognizedFourcc {
     }
 }
 
+#[cfg(feature = "std")]
 impl Error for UnrecognizedFourcc {}
 
 fn fourcc_string_form(fourcc: u32) -> Option<String> {
     fourcc_display_form(fourcc).map(|val| val.to_string())
 }
 
-fn fourcc_display_form(fourcc: u32) -> Option<impl ::core::fmt::Display> {
+fn fourcc_display_form(fourcc: u32) -> Option<impl Display + Debug> {
     let raw_bytes = fourcc.to_le_bytes();
     let mut chars = ::core::str::from_utf8(&raw_bytes)
         .ok()?
@@ -183,11 +189,17 @@ fn fourcc_display_form(fourcc: u32) -> Option<impl ::core::fmt::Display> {
         }
     }
 
-    impl ::core::fmt::Display for FormatFourccRaw {
-        fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+    impl Display for FormatFourccRaw {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
             let chars = ::core::str::from_utf8(&self.bytes[..])
                 .expect("validated previously");
             f.write_str(chars)
+        }
+    }
+
+    impl Debug for FormatFourccRaw {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            Display::fmt(self, f)
         }
     }
 
@@ -231,6 +243,7 @@ impl Display for UnrecognizedVendor {
     }
 }
 
+#[cfg(feature = "std")]
 impl Error for UnrecognizedVendor {}
 
 impl From<u64> for DrmModifier {
@@ -263,6 +276,7 @@ impl Display for UnrecognizedModifier {
     }
 }
 
+#[cfg(feature = "std")]
 impl Error for UnrecognizedModifier {}
 
 impl UnrecognizedModifier {
@@ -337,6 +351,7 @@ impl DrmModifier {
 #[cfg(test)]
 pub mod tests {
     use super::*;
+    use alloc::string::ToString;
 
     #[test]
     fn a_specific_var_has_correct_value() {
@@ -353,7 +368,7 @@ pub mod tests {
 
     #[test]
     fn enum_member_has_correct_string_format() {
-        assert_eq!(DrmFourcc::Xrgb8888.string_form(), "XR24");
+        assert_eq!(DrmFourcc::Xrgb8888.to_string(), "XR24");
     }
 
     #[test]
@@ -366,7 +381,7 @@ pub mod tests {
     #[test]
     fn unrecognized_handles_valid_fourcc() {
         assert_eq!(
-            format!("{}", UnrecognizedFourcc(828601953)),
+            UnrecognizedFourcc(828601953).to_string(),
             "UnrecognizedFourcc(\"avc1\", 828601953)"
         );
     }
@@ -374,7 +389,7 @@ pub mod tests {
     #[test]
     fn unrecognized_handles_invalid_fourcc() {
         assert_eq!(
-            format!("{}", UnrecognizedFourcc(0)),
+            UnrecognizedFourcc(0).to_string(),
             "UnrecognizedFourcc(0)"
         );
     }
