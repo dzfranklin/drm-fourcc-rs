@@ -17,11 +17,11 @@
 //! assert_eq!(DrmFourcc::Xrgb8888 as u32, 875713112);
 //! ```
 //!
-//! To get the string form of the fourcc, use [`DrmFourcc::string_form`].
+//! To get the string form of the fourcc, use [`ToString::to_string`].
 //!
 //! ```
 //! # use drm_fourcc::DrmFourcc;
-//! assert_eq!(DrmFourcc::Xrgb8888.string_form(), "XR24");
+//! assert_eq!(DrmFourcc::Xrgb8888.to_string(), "XR24");
 //! ```
 //!
 //!
@@ -82,7 +82,9 @@ impl Debug for DrmFourcc {
 
 impl Display for DrmFourcc {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        Debug::fmt(self, f)
+        fourcc_display_form(*self as u32)
+            .expect("Must be valid fourcc")
+            .fmt(f)
     }
 }
 
@@ -150,32 +152,48 @@ impl Display for UnrecognizedFourcc {
 impl Error for UnrecognizedFourcc {}
 
 fn fourcc_string_form(fourcc: u32) -> Option<String> {
-    let string = String::from_utf8(fourcc.to_le_bytes().to_vec()).ok()?;
+    fourcc_display_form(fourcc).map(|val| val.to_string())
+}
 
-    let mut out = String::new();
+fn fourcc_display_form(fourcc: u32) -> Option<impl ::core::fmt::Display> {
+    let raw_bytes = fourcc.to_le_bytes();
+    let mut chars = ::core::str::from_utf8(&raw_bytes)
+        .ok()?
+        .chars();
 
-    let chars: Vec<char> = string.chars().collect();
-    let (start, end) = chars.split_at(2);
+    let first = chars.next().unwrap();
+    let second = chars.next().unwrap();
 
     // first two bytes must be characters
-    for char in start {
-        if char.is_ascii_alphanumeric() {
-            out.push(*char);
-        } else {
+    for char in [first, second].iter().copied() {
+        if !char.is_ascii_alphanumeric() {
             return None;
         }
     }
 
-    // last two are allowed to be null
-    for char in end {
-        if *char == '\0' {
-            out.push(' ');
-        } else {
-            out.push(*char);
+    struct FormatFourccRaw {
+        bytes: [u8; 4],
+    }
+
+    let mut bytes = raw_bytes;
+    // Bytes in tail are allowed to be NUL
+    for byte in &mut bytes[4 - chars.as_str().len()..] {
+        if *byte == b'\0' {
+            *byte = b' ';
         }
     }
 
-    Some(out)
+    impl ::core::fmt::Display for FormatFourccRaw {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+            let chars = ::core::str::from_utf8(&self.bytes[..])
+                .expect("validated previously");
+            f.write_str(chars)
+        }
+    }
+
+    Some(FormatFourccRaw {
+        bytes,
+    })
 }
 
 impl TryFrom<u8> for DrmVendor {
