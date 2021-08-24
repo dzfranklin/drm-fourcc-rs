@@ -318,20 +318,20 @@ impl UnrecognizedModifier {
         if vendor == 0 {
             Ok(None)
         } else {
-            DrmVendor::try_from(vendor).map(|x| Some(x))
+            DrmVendor::try_from(vendor).map(Some)
         }
     }
 }
 
-impl Into<u64> for DrmModifier {
+impl From<DrmModifier> for u64 {
     /// Convert to an u64
     ///
     /// ```
     /// # use drm_fourcc::DrmModifier;
     /// assert_eq!(0u64, DrmModifier::Linear.into());
     /// ```
-    fn into(self) -> u64 {
-        self.into_u64()
+    fn from(val: DrmModifier) -> u64 {
+        val.into_u64()
     }
 }
 
@@ -368,7 +368,7 @@ impl DrmModifier {
         if vendor == 0 {
             Ok(None)
         } else {
-            DrmVendor::try_from(vendor).map(|x| Some(x))
+            DrmVendor::try_from(vendor).map(Some)
         }
     }
 }

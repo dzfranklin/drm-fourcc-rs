@@ -328,7 +328,7 @@ impl DrmModifier {
             x => Self::Unrecognized(x),
         }
     }
-    pub(crate) fn into_u64(&self) -> u64 {
+    pub(crate) fn into_u64(self) -> u64 {
         match self {
             Self::Allwinner_tiled => consts::DRM_FOURCC_ALLWINNER_TILED,
             Self::Broadcom_sand128 => consts::DRM_FOURCC_BROADCOM_SAND128,
@@ -363,7 +363,7 @@ impl DrmModifier {
             Self::I915_y_tiled_ccs => consts::DRM_FOURCC_I915_Y_TILED_CCS,
             Self::I915_y_tiled_gen12_mc_ccs => consts::DRM_FOURCC_I915_Y_TILED_GEN12_MC_CCS,
             Self::I915_y_tiled_gen12_rc_ccs => consts::DRM_FOURCC_I915_Y_TILED_GEN12_RC_CCS,
-            Self::Unrecognized(x) => *x,
+            Self::Unrecognized(x) => x,
         }
     }
 }
