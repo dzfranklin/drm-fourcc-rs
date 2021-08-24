@@ -53,7 +53,10 @@ mod generate {
         let format_names: Vec<(&str, &str)> = stdout
             .lines()
             .filter_map(|line| {
-                if line.contains("DRM_FORMAT_RESERVED") || line.contains("INVALID") || line.contains("_MOD_") {
+                if line.contains("DRM_FORMAT_RESERVED")
+                    || line.contains("INVALID")
+                    || line.contains("_MOD_")
+                {
                     return None;
                 }
 
@@ -66,7 +69,8 @@ mod generate {
             })
             .collect();
 
-        let vendor_re = Regex::new(r"^\s*#define (?P<full>DRM_FORMAT_MOD_VENDOR_(?P<short>[A-Z0-9_]+)) ")?;
+        let vendor_re =
+            Regex::new(r"^\s*#define (?P<full>DRM_FORMAT_MOD_VENDOR_(?P<short>[A-Z0-9_]+)) ")?;
         let vendor_names: Vec<(&str, &str)> = stdout
             .lines()
             .filter_map(|line| {
@@ -83,14 +87,16 @@ mod generate {
             })
             .collect();
 
-        let mod_re = Regex::new(r"^\s*#define (?P<full>(DRM|I915)_FORMAT_MOD_(?P<short>[A-Z0-9_]+)) ")?;
+        let mod_re =
+            Regex::new(r"^\s*#define (?P<full>(DRM|I915)_FORMAT_MOD_(?P<short>[A-Z0-9_]+)) ")?;
         let modifier_names: Vec<(&str, String)> = stdout
             .lines()
             .filter_map(|line| {
                 if line.contains("DRM_FORMAT_MOD_NONE")
                     || line.contains("DRM_FORMAT_MOD_RESERVED")
                     || line.contains("VENDOR")
-                    || line.contains("ARM_TYPE") // grrr..
+                    // grrr..
+                    || line.contains("ARM_TYPE")
                 {
                     return None;
                 }
@@ -99,11 +105,14 @@ mod generate {
                     let full = caps.name("full").unwrap().as_str();
                     let short = caps.name("short").unwrap().as_str();
 
-                    (full, if full.contains("I915") {
-                        format!("I915_{}", short)
-                    } else {
-                        String::from(short)
-                    })
+                    (
+                        full,
+                        if full.contains("I915") {
+                            format!("I915_{}", short)
+                        } else {
+                            String::from(short)
+                        },
+                    )
                 })
             })
             .collect();
@@ -137,7 +146,12 @@ mod generate {
             .write_to_file("src/consts.rs")?;
 
         // Then generate our enums
-        fn write_enum(as_enum: &mut File, name: &str, repr: &str, names: Vec<(&str, &str)>) -> Result<(), std::io::Error> {
+        fn write_enum(
+            as_enum: &mut File,
+            name: &str,
+            repr: &str,
+            names: Vec<(&str, &str)>,
+        ) -> Result<(), std::io::Error> {
             as_enum.write_all(b"#[derive(Copy, Clone, Eq, PartialEq, Hash)]")?;
             as_enum.write_all(
                 b"#[cfg_attr(feature = \"serde\", derive(serde::Serialize, serde::Deserialize))]",
@@ -162,7 +176,11 @@ mod generate {
             as_enum.write_all(b"}\n")?;
 
             writeln!(as_enum, "impl {} {{", name)?;
-            writeln!(as_enum, "pub(crate) fn from_{}(n: {}) -> Option<Self> {{\n", repr, repr)?;
+            writeln!(
+                as_enum,
+                "pub(crate) fn from_{}(n: {}) -> Option<Self> {{\n",
+                repr, repr
+            )?;
             as_enum.write_all(b"match n {\n")?;
 
             for (member, value) in &members {
@@ -220,7 +238,7 @@ mod generate {
                 writeln!(as_enum, "{} => Self::{},", value, member)?;
             }
             as_enum.write_all(b"x => Self::Unrecognized(x)\n")?;
-            
+
             as_enum.write_all(b"}}\n")?;
             as_enum.write_all(b"pub(crate) fn into_u64(&self) -> u64 {\n")?;
             as_enum.write_all(b"match self {\n")?;

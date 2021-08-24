@@ -103,8 +103,8 @@ impl TryFrom<u32> for DrmFourcc {
 
     /// Convert from an u32
     ///
-    #[cfg_attr(feature = "std", doc="```")]
-    #[cfg_attr(not(feature = "std"), doc="```ignore")]
+    #[cfg_attr(feature = "std", doc = "```")]
+    #[cfg_attr(not(feature = "std"), doc = "```ignore")]
     /// # use drm_fourcc::DrmFourcc;
     /// # use std::convert::TryFrom;
     /// assert_eq!(DrmFourcc::try_from(875710274).unwrap(), DrmFourcc::Bgr888);
@@ -121,8 +121,8 @@ impl TryFrom<u32> for DrmFourcc {
 
 /// Wraps some u32 that isn't a DRM fourcc we recognize
 ///
-#[cfg_attr(feature = "std", doc="```")]
-#[cfg_attr(not(feature = "std"), doc="```ignore")]
+#[cfg_attr(feature = "std", doc = "```")]
+#[cfg_attr(not(feature = "std"), doc = "```ignore")]
 /// # use drm_fourcc::{DrmFourcc, UnrecognizedFourcc};
 /// # use std::convert::TryFrom;
 /// // Get the u32
