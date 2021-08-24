@@ -73,6 +73,7 @@ pub struct DrmFormat {
 impl DrmFourcc {
     /// Get the string representation of the format's fourcc.
     #[cfg(feature = "std")]
+    #[deprecated(since = "2.2.0", note = "Use `ToString::to_string` instead")]
     pub fn string_form(&self) -> String {
         self.display_form().to_string()
     }
