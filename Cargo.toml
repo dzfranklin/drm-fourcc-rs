@@ -1,6 +1,6 @@
 [package]
 name = "drm-fourcc"
-version = "2.1.1"
+version = "2.2.0"
 authors = ["Daniel Franklin <daniel@danielzfranklin.org>"]
 edition = "2018"
 license = "MIT"
