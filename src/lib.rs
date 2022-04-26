@@ -61,6 +61,7 @@ use std::error::Error;
 pub use as_enum::{DrmFourcc, DrmModifier, DrmVendor};
 
 mod as_enum;
+#[allow(non_upper_case_globals)]
 mod consts;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

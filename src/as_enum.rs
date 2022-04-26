@@ -295,6 +295,8 @@ pub enum DrmModifier {
     I915_y_tiled_gen12_mc_ccs,
     I915_y_tiled_gen12_rc_ccs,
     I915_y_tiled_gen12_rc_ccs_cc,
+    I915_yf_tiled,
+    I915_yf_tiled_ccs,
     Unrecognized(u64),
 }
 impl DrmModifier {
@@ -335,6 +337,8 @@ impl DrmModifier {
             consts::DRM_FOURCC_I915_Y_TILED_GEN12_MC_CCS => Self::I915_y_tiled_gen12_mc_ccs,
             consts::DRM_FOURCC_I915_Y_TILED_GEN12_RC_CCS => Self::I915_y_tiled_gen12_rc_ccs,
             consts::DRM_FOURCC_I915_Y_TILED_GEN12_RC_CCS_CC => Self::I915_y_tiled_gen12_rc_ccs_cc,
+            consts::DRM_FOURCC_I915_Yf_TILED => Self::I915_yf_tiled,
+            consts::DRM_FOURCC_I915_Yf_TILED_CCS => Self::I915_yf_tiled_ccs,
             x => Self::Unrecognized(x),
         }
     }
@@ -374,6 +378,8 @@ impl DrmModifier {
             Self::I915_y_tiled_gen12_mc_ccs => consts::DRM_FOURCC_I915_Y_TILED_GEN12_MC_CCS,
             Self::I915_y_tiled_gen12_rc_ccs => consts::DRM_FOURCC_I915_Y_TILED_GEN12_RC_CCS,
             Self::I915_y_tiled_gen12_rc_ccs_cc => consts::DRM_FOURCC_I915_Y_TILED_GEN12_RC_CCS_CC,
+            Self::I915_yf_tiled => consts::DRM_FOURCC_I915_Yf_TILED,
+            Self::I915_yf_tiled_ccs => consts::DRM_FOURCC_I915_Yf_TILED_CCS,
             Self::Unrecognized(x) => x,
         }
     }
