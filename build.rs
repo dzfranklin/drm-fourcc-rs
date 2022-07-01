@@ -240,13 +240,13 @@ mod generate {
             as_enum.write_all(b"x => Self::Unrecognized(x)\n")?;
 
             as_enum.write_all(b"}}\n")?;
-            as_enum.write_all(b"pub(crate) fn into_u64(&self) -> u64 {\n")?;
+            as_enum.write_all(b"pub(crate) fn into_u64(self) -> u64 {\n")?;
             as_enum.write_all(b"match self {\n")?;
 
             for (member, value) in &modifier_members {
                 writeln!(as_enum, "Self::{} => {},", member, value)?;
             }
-            as_enum.write_all(b"Self::Unrecognized(x) => *x,\n")?;
+            as_enum.write_all(b"Self::Unrecognized(x) => x,\n")?;
 
             as_enum.write_all(b"}}}\n")?;
         }
