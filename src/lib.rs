@@ -195,7 +195,7 @@ fn fourcc_display_form(fourcc: u32) -> Option<impl Display + Debug> {
     let second = chars.next().unwrap();
 
     // first two bytes must be characters
-    for char in [first, second].iter().copied() {
+    for char in [first, second].iter() {
         if !char.is_ascii_alphanumeric() {
             return None;
         }
