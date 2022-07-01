@@ -5,11 +5,13 @@ use crate::consts;
 #[repr(u32)]
 pub enum DrmFourcc {
     Abgr1555 = consts::DRM_FOURCC_ABGR1555,
+    Abgr16161616 = consts::DRM_FOURCC_ABGR16161616,
     Abgr16161616f = consts::DRM_FOURCC_ABGR16161616F,
     Abgr2101010 = consts::DRM_FOURCC_ABGR2101010,
     Abgr4444 = consts::DRM_FOURCC_ABGR4444,
     Abgr8888 = consts::DRM_FOURCC_ABGR8888,
     Argb1555 = consts::DRM_FOURCC_ARGB1555,
+    Argb16161616 = consts::DRM_FOURCC_ARGB16161616,
     Argb16161616f = consts::DRM_FOURCC_ARGB16161616F,
     Argb2101010 = consts::DRM_FOURCC_ARGB2101010,
     Argb4444 = consts::DRM_FOURCC_ARGB4444,
@@ -72,12 +74,14 @@ pub enum DrmFourcc {
     X0l0 = consts::DRM_FOURCC_X0L0,
     X0l2 = consts::DRM_FOURCC_X0L2,
     Xbgr1555 = consts::DRM_FOURCC_XBGR1555,
+    Xbgr16161616 = consts::DRM_FOURCC_XBGR16161616,
     Xbgr16161616f = consts::DRM_FOURCC_XBGR16161616F,
     Xbgr2101010 = consts::DRM_FOURCC_XBGR2101010,
     Xbgr4444 = consts::DRM_FOURCC_XBGR4444,
     Xbgr8888 = consts::DRM_FOURCC_XBGR8888,
     Xbgr8888_a8 = consts::DRM_FOURCC_XBGR8888_A8,
     Xrgb1555 = consts::DRM_FOURCC_XRGB1555,
+    Xrgb16161616 = consts::DRM_FOURCC_XRGB16161616,
     Xrgb16161616f = consts::DRM_FOURCC_XRGB16161616F,
     Xrgb2101010 = consts::DRM_FOURCC_XRGB2101010,
     Xrgb4444 = consts::DRM_FOURCC_XRGB4444,
@@ -114,11 +118,13 @@ impl DrmFourcc {
     pub(crate) fn from_u32(n: u32) -> Option<Self> {
         match n {
             consts::DRM_FOURCC_ABGR1555 => Some(Self::Abgr1555),
+            consts::DRM_FOURCC_ABGR16161616 => Some(Self::Abgr16161616),
             consts::DRM_FOURCC_ABGR16161616F => Some(Self::Abgr16161616f),
             consts::DRM_FOURCC_ABGR2101010 => Some(Self::Abgr2101010),
             consts::DRM_FOURCC_ABGR4444 => Some(Self::Abgr4444),
             consts::DRM_FOURCC_ABGR8888 => Some(Self::Abgr8888),
             consts::DRM_FOURCC_ARGB1555 => Some(Self::Argb1555),
+            consts::DRM_FOURCC_ARGB16161616 => Some(Self::Argb16161616),
             consts::DRM_FOURCC_ARGB16161616F => Some(Self::Argb16161616f),
             consts::DRM_FOURCC_ARGB2101010 => Some(Self::Argb2101010),
             consts::DRM_FOURCC_ARGB4444 => Some(Self::Argb4444),
@@ -181,12 +187,14 @@ impl DrmFourcc {
             consts::DRM_FOURCC_X0L0 => Some(Self::X0l0),
             consts::DRM_FOURCC_X0L2 => Some(Self::X0l2),
             consts::DRM_FOURCC_XBGR1555 => Some(Self::Xbgr1555),
+            consts::DRM_FOURCC_XBGR16161616 => Some(Self::Xbgr16161616),
             consts::DRM_FOURCC_XBGR16161616F => Some(Self::Xbgr16161616f),
             consts::DRM_FOURCC_XBGR2101010 => Some(Self::Xbgr2101010),
             consts::DRM_FOURCC_XBGR4444 => Some(Self::Xbgr4444),
             consts::DRM_FOURCC_XBGR8888 => Some(Self::Xbgr8888),
             consts::DRM_FOURCC_XBGR8888_A8 => Some(Self::Xbgr8888_a8),
             consts::DRM_FOURCC_XRGB1555 => Some(Self::Xrgb1555),
+            consts::DRM_FOURCC_XRGB16161616 => Some(Self::Xrgb16161616),
             consts::DRM_FOURCC_XRGB16161616F => Some(Self::Xrgb16161616f),
             consts::DRM_FOURCC_XRGB2101010 => Some(Self::Xrgb2101010),
             consts::DRM_FOURCC_XRGB4444 => Some(Self::Xrgb4444),
@@ -286,6 +294,7 @@ pub enum DrmModifier {
     I915_y_tiled_ccs,
     I915_y_tiled_gen12_mc_ccs,
     I915_y_tiled_gen12_rc_ccs,
+    I915_y_tiled_gen12_rc_ccs_cc,
     Unrecognized(u64),
 }
 impl DrmModifier {
@@ -325,6 +334,7 @@ impl DrmModifier {
             consts::DRM_FOURCC_I915_Y_TILED_CCS => Self::I915_y_tiled_ccs,
             consts::DRM_FOURCC_I915_Y_TILED_GEN12_MC_CCS => Self::I915_y_tiled_gen12_mc_ccs,
             consts::DRM_FOURCC_I915_Y_TILED_GEN12_RC_CCS => Self::I915_y_tiled_gen12_rc_ccs,
+            consts::DRM_FOURCC_I915_Y_TILED_GEN12_RC_CCS_CC => Self::I915_y_tiled_gen12_rc_ccs_cc,
             x => Self::Unrecognized(x),
         }
     }
@@ -363,6 +373,7 @@ impl DrmModifier {
             Self::I915_y_tiled_ccs => consts::DRM_FOURCC_I915_Y_TILED_CCS,
             Self::I915_y_tiled_gen12_mc_ccs => consts::DRM_FOURCC_I915_Y_TILED_GEN12_MC_CCS,
             Self::I915_y_tiled_gen12_rc_ccs => consts::DRM_FOURCC_I915_Y_TILED_GEN12_RC_CCS,
+            Self::I915_y_tiled_gen12_rc_ccs_cc => consts::DRM_FOURCC_I915_Y_TILED_GEN12_RC_CCS_CC,
             Self::Unrecognized(x) => x,
         }
     }
