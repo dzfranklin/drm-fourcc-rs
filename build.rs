@@ -158,7 +158,6 @@ mod generate {
         // Add additional include paths
         for include_path in &extra_includes {
             let path = include_path
-                .as_os_str()
                 .to_str()
                 .expect("path is not valid utf8");
             builder = builder.clang_args(["-I", path]);
