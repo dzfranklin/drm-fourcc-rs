@@ -18,19 +18,33 @@ mod generate {
     use regex::Regex;
     use std::env;
     use std::fs::File;
-    use std::path::Path;
+    use std::path::{Path, PathBuf};
 
-    static CONST_PREFIX: &'static str = "DRM_FOURCC_";
+    const CONST_PREFIX: &str = "DRM_FOURCC_";
+
+    pub fn get_header_include_paths() -> Vec<PathBuf> {
+        let library = pkg_config::Config::new()
+            .probe("libdrm")
+            .expect("Failed to find libdrm");
+
+        library.include_paths
+    }
 
     pub fn generate() -> Result<(), Box<dyn Error + Sync + Send>> {
+        let extra_includes = get_header_include_paths();
         let out_dir = env::var("OUT_DIR").unwrap();
         let wrapper_path = Path::new(&out_dir).join("wrapper.h");
 
         // First get all the macros in drm_fourcc.h
+        let mut cmd = Command::new("clang");
+        cmd.arg("-E") // run pre-processor only
+            .arg("-dM"); // output all macros defined
 
-        let mut cmd = Command::new("clang")
-            .arg("-E") // run pre-processor only
-            .arg("-dM") // output all macros defined
+        for include_path in &extra_includes {
+            cmd.arg("-I").arg(include_path);
+        }
+
+        let mut cmd = cmd
             .arg("-") // take input from stdin
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -38,7 +52,7 @@ mod generate {
 
         {
             let stdin = cmd.stdin.as_mut().expect("failed to open stdin");
-            stdin.write_all(b"#include <drm/drm_fourcc.h>\n")?;
+            stdin.write_all(b"#include <drm_fourcc.h>\n")?;
         }
 
         let result = cmd.wait_with_output()?;
@@ -122,7 +136,7 @@ mod generate {
         let mut wrapper = File::create(&wrapper_path)?;
 
         wrapper.write_all(b"#include <stdint.h>\n")?;
-        wrapper.write_all(b"#include <drm/drm_fourcc.h>\n")?;
+        wrapper.write_all(b"#include <drm_fourcc.h>\n")?;
 
         for (full, short) in &format_names {
             writeln!(wrapper, "uint32_t {}{} = {};\n", CONST_PREFIX, short, full)?;
@@ -136,14 +150,22 @@ mod generate {
 
         wrapper.flush()?;
 
-        // Then generate bindings from that file
-        bindgen::builder()
+        let mut builder = bindgen::builder()
             .ctypes_prefix("crate::_fake_ctypes")
-            .header(wrapper_path.as_os_str().to_str().unwrap())
-            .whitelist_var("DRM_FOURCC_.*")
-            .generate()
-            .unwrap()
-            .write_to_file("src/consts.rs")?;
+            .header(wrapper_path.to_str().unwrap())
+            .whitelist_var("DRM_FOURCC_.*");
+
+        // Add additional include paths
+        for include_path in &extra_includes {
+            let path = include_path
+                .as_os_str()
+                .to_str()
+                .expect("path is not valid utf8");
+            builder = builder.clang_args(["-I", path]);
+        }
+
+        // Then generate bindings from that file
+        builder.generate().unwrap().write_to_file("src/consts.rs")?;
 
         // Then generate our enums
         fn write_enum(

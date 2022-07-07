@@ -16,7 +16,7 @@ default = ["std"]
 # Adds `Error` impls for the Unrecognized types.
 std = []
 # Re-build the bindings based on the headers on your machine. Should not be necessary
-build_bindings = ["regex", "bindgen"]
+build_bindings = ["regex", "bindgen", "pkg-config"]
 
 [dependencies]
 serde = { version = "1.0.125", optional = true, features = ["derive"] }
@@ -24,3 +24,4 @@ serde = { version = "1.0.125", optional = true, features = ["derive"] }
 [build-dependencies]
 regex = { version = "1.4.3", optional = true }
 bindgen = { version = "0.57.0", optional = true }
+pkg-config = { version = "0.3.25", optional = true }
