@@ -63,7 +63,7 @@ mod generate {
 
         // Then get the names of the format macros
 
-        let fmt_re = Regex::new(r"^\s*#define (?P<full>DRM_FORMAT_(?P<short>[a-zA-Z0-9_]+)) ")?;
+        let fmt_re = Regex::new(r"^\s*#define (?P<full>DRM_FORMAT_(?P<short>\w+)) ")?;
         let format_names: Vec<(&str, &str)> = stdout
             .lines()
             .filter_map(|line| {
@@ -84,7 +84,7 @@ mod generate {
             .collect();
 
         let vendor_re =
-            Regex::new(r"^\s*#define (?P<full>DRM_FORMAT_MOD_VENDOR_(?P<short>[a-zA-Z0-9_]+)) ")?;
+            Regex::new(r"^\s*#define (?P<full>DRM_FORMAT_MOD_VENDOR_(?P<short>\w+)) ")?;
         let vendor_names: Vec<(&str, &str)> = stdout
             .lines()
             .filter_map(|line| {
@@ -102,7 +102,7 @@ mod generate {
             .collect();
 
         let mod_re =
-            Regex::new(r"^\s*#define (?P<full>(DRM|I915)_FORMAT_MOD_(?P<short>[a-zA-Z0-9_]+)) ")?;
+            Regex::new(r"^\s*#define (?P<full>(DRM|I915)_FORMAT_MOD_(?P<short>\w+)) ")?;
         let modifier_names: Vec<(&str, String)> = stdout
             .lines()
             .filter_map(|line| {
