@@ -99,6 +99,12 @@ impl Display for DrmFourcc {
     }
 }
 
+impl From<DrmFourcc> for u32 {
+    fn from(fourcc: DrmFourcc) -> u32 {
+        fourcc as u32
+    }
+}
+
 impl TryFrom<u32> for DrmFourcc {
     type Error = UnrecognizedFourcc;
 
@@ -233,6 +239,12 @@ fn fourcc_display_form(fourcc: u32) -> Option<impl Display + Debug> {
     }
 
     Some(FormatFourccRaw { bytes })
+}
+
+impl From<DrmVendor> for u8 {
+    fn from(vendor: DrmVendor) -> u8 {
+        vendor as u8
+    }
 }
 
 impl TryFrom<u8> for DrmVendor {
