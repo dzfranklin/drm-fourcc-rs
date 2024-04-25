@@ -295,9 +295,15 @@ impl From<u64> for DrmModifier {
 /// // Get the u64
 /// assert_eq!(UnrecognizedModifier(42).0, 42);
 /// ```
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnrecognizedModifier(pub u64);
+
+impl Debug for UnrecognizedModifier {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "unrecognized(0x{:x})", self.0)
+    }
+}
 
 impl Display for UnrecognizedModifier {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
