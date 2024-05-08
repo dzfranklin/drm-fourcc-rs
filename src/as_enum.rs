@@ -115,6 +115,7 @@ pub enum DrmFourcc {
     Yvyu = consts::DRM_FOURCC_YVYU,
 }
 impl DrmFourcc {
+    #[inline]
     pub(crate) fn from_u32(n: u32) -> Option<Self> {
         match n {
             consts::DRM_FOURCC_ABGR1555 => Some(Self::Abgr1555),
@@ -246,6 +247,7 @@ pub enum DrmVendor {
     Vivante = consts::DRM_FOURCC_VIVANTE,
 }
 impl DrmVendor {
+    #[inline]
     pub(crate) fn from_u8(n: u8) -> Option<Self> {
         match n {
             consts::DRM_FOURCC_ALLWINNER => Some(Self::Allwinner),
@@ -300,6 +302,7 @@ pub enum DrmModifier {
     Unrecognized(u64),
 }
 impl DrmModifier {
+    #[inline]
     pub(crate) fn from_u64(n: u64) -> Self {
         #[allow(unreachable_patterns)]
         match n {
@@ -341,7 +344,8 @@ impl DrmModifier {
             consts::DRM_FOURCC_I915_Yf_TILED_CCS => Self::I915_yf_tiled_ccs,
             x => Self::Unrecognized(x),
         }
-    }
+    }    
+    #[inline]
     pub(crate) fn into_u64(self) -> u64 {
         match self {
             Self::Allwinner_tiled => consts::DRM_FOURCC_ALLWINNER_TILED,
