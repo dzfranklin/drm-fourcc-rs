@@ -115,6 +115,7 @@ impl TryFrom<u32> for DrmFourcc {
     /// // If the u32 is in the valid format to be a fourcc, you can see its string form
     /// assert_eq!(DrmFourcc::try_from(828601953).unwrap_err().string_form(), Some("avc1".to_string()));
     /// ```
+    #[inline]
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         Self::from_u32(value).ok_or(UnrecognizedFourcc(value))
     }
@@ -246,6 +247,7 @@ impl TryFrom<u8> for DrmVendor {
     ///
     /// assert!(DrmVendor::try_from(0).is_err());
     /// ```
+    #[inline]
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         Self::from_u8(value).ok_or(UnrecognizedVendor(value))
     }
@@ -279,6 +281,7 @@ impl From<u64> for DrmModifier {
     /// # use drm_fourcc::DrmModifier;
     /// assert_eq!(DrmModifier::from(0), DrmModifier::Linear);
     /// ```
+    #[inline]
     fn from(value: u64) -> Self {
         Self::from_u64(value)
     }
@@ -331,12 +334,14 @@ impl From<DrmModifier> for u64 {
     /// # use drm_fourcc::DrmModifier;
     /// assert_eq!(0u64, DrmModifier::Linear.into());
     /// ```
+    #[inline]
     fn from(val: DrmModifier) -> u64 {
         val.into_u64()
     }
 }
 
 impl PartialEq for DrmModifier {
+    #[inline]
     fn eq(&self, other: &Self) -> bool {
         self.into_u64() == other.into_u64()
     }
@@ -344,12 +349,14 @@ impl PartialEq for DrmModifier {
 impl Eq for DrmModifier {}
 
 impl PartialEq<u64> for DrmModifier {
+    #[inline]
     fn eq(&self, other: &u64) -> bool {
         &self.into_u64() == other
     }
 }
 
 impl Hash for DrmModifier {
+    #[inline]
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.into_u64().hash(state);
     }
