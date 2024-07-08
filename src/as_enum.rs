@@ -299,6 +299,13 @@ pub enum DrmModifier {
     I915_y_tiled_gen12_rc_ccs,
     I915_y_tiled_gen12_mc_ccs,
     I915_y_tiled_gen12_rc_ccs_cc,
+    I915_mod4_tiled,
+    I915_mod4_tiled_dg2_rc_ccs,
+    I915_mod4_tiled_dg2_mc_ccs,
+    I915_mod4_tiled_dg2_rc_ccs_cc,
+    I915_mod4_tiled_mtl_rc_ccs,
+    I915_mod4_tiled_mtl_mc_ccs,
+    I915_mod4_tiled_mtl_rc_ccs_cc,
     Unrecognized(u64),
 }
 impl DrmModifier {
@@ -339,9 +346,26 @@ impl DrmModifier {
             consts::DRM_FOURCC_I915_Yf_TILED => Self::I915_yf_tiled,
             consts::DRM_FOURCC_I915_Y_TILED_CCS => Self::I915_y_tiled_ccs,
             consts::DRM_FOURCC_I915_Yf_TILED_CCS => Self::I915_yf_tiled_ccs,
+            consts::DRM_FOURCC_I915_Y_TILED_CCS => Self::I915_y_tiled_ccs,
+            consts::DRM_FOURCC_I915_Y_TILED_GEN12_MC_CCS => Self::I915_y_tiled_gen12_mc_ccs,
+            consts::DRM_FOURCC_I915_Y_TILED_GEN12_RC_CCS => Self::I915_y_tiled_gen12_rc_ccs,
+            consts::DRM_FOURCC_I915_Y_TILED_GEN12_RC_CCS_CC => Self::I915_y_tiled_gen12_rc_ccs_cc,
+            consts::DRM_FOURCC_I915_Yf_TILED => Self::I915_yf_tiled,
+            consts::DRM_FOURCC_I915_Yf_TILED_CCS => Self::I915_yf_tiled_ccs,
             consts::DRM_FOURCC_I915_Y_TILED_GEN12_RC_CCS => Self::I915_y_tiled_gen12_rc_ccs,
             consts::DRM_FOURCC_I915_Y_TILED_GEN12_MC_CCS => Self::I915_y_tiled_gen12_mc_ccs,
             consts::DRM_FOURCC_I915_Y_TILED_GEN12_RC_CCS_CC => Self::I915_y_tiled_gen12_rc_ccs_cc,
+            consts::DRM_FOURCC_I915_MOD_4_TILED => Self::I915_mod4_tiled,
+            consts::DRM_FOURCC_I915_MOD_4_TILED_DG2_RC_CCS => Self::I915_mod4_tiled_dg2_rc_ccs,
+            consts::DRM_FOURCC_I915_MOD_4_TILED_DG2_MC_CCS => Self::I915_mod4_tiled_dg2_mc_ccs,
+            consts::DRM_FOURCC_I915_MOD_4_TILED_DG2_RC_CCS_CC => {
+                Self::I915_mod4_tiled_dg2_rc_ccs_cc
+            }
+            consts::DRM_FOURCC_I915_MOD_4_TILED_MTL_RC_CCS => Self::I915_mod4_tiled_mtl_rc_ccs,
+            consts::DRM_FOURCC_I915_MOD_4_TILED_MTL_MC_CCS => Self::I915_mod4_tiled_mtl_mc_ccs,
+            consts::DRM_FOURCC_I915_MOD_4_TILED_MTL_RC_CCS_CC => {
+                Self::I915_mod4_tiled_mtl_rc_ccs_cc
+            }
             x => Self::Unrecognized(x),
         }
     }
@@ -384,6 +408,17 @@ impl DrmModifier {
             Self::I915_y_tiled_gen12_rc_ccs => consts::DRM_FOURCC_I915_Y_TILED_GEN12_RC_CCS,
             Self::I915_y_tiled_gen12_mc_ccs => consts::DRM_FOURCC_I915_Y_TILED_GEN12_MC_CCS,
             Self::I915_y_tiled_gen12_rc_ccs_cc => consts::DRM_FOURCC_I915_Y_TILED_GEN12_RC_CCS_CC,
+            Self::I915_mod4_tiled => consts::DRM_FOURCC_I915_MOD_4_TILED,
+            Self::I915_mod4_tiled_dg2_rc_ccs => consts::DRM_FOURCC_I915_MOD_4_TILED_DG2_RC_CCS,
+            Self::I915_mod4_tiled_dg2_mc_ccs => consts::DRM_FOURCC_I915_MOD_4_TILED_DG2_MC_CCS,
+            Self::I915_mod4_tiled_dg2_rc_ccs_cc => {
+                consts::DRM_FOURCC_I915_MOD_4_TILED_DG2_RC_CCS_CC
+            }
+            Self::I915_mod4_tiled_mtl_rc_ccs => consts::DRM_FOURCC_I915_MOD_4_TILED_MTL_RC_CCS,
+            Self::I915_mod4_tiled_mtl_mc_ccs => consts::DRM_FOURCC_I915_MOD_4_TILED_MTL_MC_CCS,
+            Self::I915_mod4_tiled_mtl_rc_ccs_cc => {
+                consts::DRM_FOURCC_I915_MOD_4_TILED_MTL_RC_CCS_CC
+            }
             Self::Unrecognized(x) => x,
         }
     }
