@@ -83,8 +83,7 @@ mod generate {
             })
             .collect();
 
-        let vendor_re =
-            Regex::new(r"^\s*#define (?P<full>DRM_FORMAT_MOD_VENDOR_(?P<short>\w+)) ")?;
+        let vendor_re = Regex::new(r"^\s*#define (?P<full>DRM_FORMAT_MOD_VENDOR_(?P<short>\w+)) ")?;
         let vendor_names: Vec<(&str, &str)> = stdout
             .lines()
             .filter_map(|line| {
@@ -101,8 +100,7 @@ mod generate {
             })
             .collect();
 
-        let mod_re =
-            Regex::new(r"^\s*#define (?P<full>(DRM|I915)_FORMAT_MOD_(?P<short>\w+)) ")?;
+        let mod_re = Regex::new(r"^\s*#define (?P<full>(DRM|I915)_FORMAT_MOD_(?P<short>\w+)) ")?;
         let modifier_names: Vec<(&str, String)> = stdout
             .lines()
             .filter_map(|line| {
@@ -157,9 +155,7 @@ mod generate {
 
         // Add additional include paths
         for include_path in &extra_includes {
-            let path = include_path
-                .to_str()
-                .expect("path is not valid utf8");
+            let path = include_path.to_str().expect("path is not valid utf8");
             builder = builder.clang_args(["-I", path]);
         }
 

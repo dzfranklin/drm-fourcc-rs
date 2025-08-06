@@ -344,7 +344,7 @@ impl DrmModifier {
             consts::DRM_FOURCC_I915_Yf_TILED_CCS => Self::I915_yf_tiled_ccs,
             x => Self::Unrecognized(x),
         }
-    }    
+    }
     #[inline]
     pub(crate) fn into_u64(self) -> u64 {
         match self {
