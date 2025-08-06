@@ -3,7 +3,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 //! [`DrmFourcc`] is an enum representing every pixel format supported by DRM
-//! (as of kernel version 5.10.0).
+//! (as of kernel version 6.15.9).
 //!
 //! A [fourcc][fourcc_wiki] is four bytes of ascii representing some data format. This enum contains
 //! every fourcc representing a pixel format supported by [DRM][drm_wiki], the Linux Direct
