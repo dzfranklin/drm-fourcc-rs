@@ -458,4 +458,13 @@ pub mod tests {
         let b = a;
         assert_eq!(a, b);
     }
+
+    #[test]
+    fn unknown_modifier_eq() {
+        // Test if a user-constructed modifier matches a defined one, i.e. Unrecognized() is idempotent
+        assert_eq!(
+            DrmModifier::Unrecognized(DrmModifier::Allwinner_tiled.into_u64()),
+            DrmModifier::Allwinner_tiled
+        );
+    }
 }
