@@ -299,52 +299,6 @@ impl From<u64> for DrmModifier {
     }
 }
 
-/// Wraps some u64 that isn't a DRM modifier we recognize
-///
-/// ```
-/// # use drm_fourcc::{DrmModifier, UnrecognizedModifier};
-/// # use std::convert::TryFrom;
-/// // Get the u64
-/// assert_eq!(UnrecognizedModifier(42).0, 42);
-/// ```
-#[derive(Copy, Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct UnrecognizedModifier(pub u64);
-
-impl Debug for UnrecognizedModifier {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "unrecognized(0x{:x})", self.0)
-    }
-}
-
-impl Display for UnrecognizedModifier {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        Debug::fmt(&self, f)
-    }
-}
-
-#[cfg(feature = "std")]
-impl Error for UnrecognizedModifier {}
-
-impl UnrecognizedModifier {
-    /// Get the vendor of the unrecognized modifier, if any
-    ///
-    /// ```
-    /// # use drm_fourcc::{DrmModifier, DrmVendor, UnrecognizedModifier, UnrecognizedVendor};
-    /// assert_eq!(UnrecognizedModifier(216172782113783827).vendor(), Ok(Some(DrmVendor::Nvidia)));
-    /// assert_eq!(UnrecognizedModifier(2).vendor(), Ok(None));
-    /// assert_eq!(UnrecognizedModifier(8646911284551352320).vendor(), Err(UnrecognizedVendor(120)));
-    /// ```
-    pub fn vendor(&self) -> Result<Option<DrmVendor>, UnrecognizedVendor> {
-        let vendor = (self.0 >> 56) as u8;
-        if vendor == 0 {
-            Ok(None)
-        } else {
-            DrmVendor::try_from(vendor).map(Some)
-        }
-    }
-}
-
 impl From<DrmModifier> for u64 {
     /// Convert to an u64
     ///
