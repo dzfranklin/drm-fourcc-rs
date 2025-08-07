@@ -100,8 +100,10 @@ mod generate {
             })
             .collect();
 
-        let mod_re = Regex::new(r"^\s*#define (?P<full>(DRM|I915)_FORMAT_MOD_(?P<short>\w+)) ")?;
-        let modifier_names: Vec<(&str, String)> = stdout
+        let mod_re = Regex::new(
+            r"^\s*#define (?P<full>(DRM|I915)_FORMAT_MOD_(?P<short>\w+)) (DRM_FORMAT_MOD_(?P<alias>\w+)$)?",
+        )?;
+        let modifier_names: Vec<(&str, String, Option<&str>)> = stdout
             .lines()
             .filter_map(|line| {
                 if line.contains("DRM_FORMAT_MOD_NONE")
@@ -116,6 +118,7 @@ mod generate {
                 mod_re.captures(line).map(|caps| {
                     let full = caps.name("full").unwrap().as_str();
                     let short = caps.name("short").unwrap().as_str();
+                    let alias = caps.name("alias").map(|m| m.as_str());
 
                     (
                         full,
@@ -124,6 +127,7 @@ mod generate {
                         } else {
                             String::from(short)
                         },
+                        alias,
                     )
                 })
             })
@@ -142,7 +146,7 @@ mod generate {
         for (full, short) in &vendor_names {
             writeln!(wrapper, "uint8_t {}{} = {};\n", CONST_PREFIX, short, full)?;
         }
-        for (full, short) in &modifier_names {
+        for (full, short, _alias) in &modifier_names {
             writeln!(wrapper, "uint64_t {}{} = {};\n", CONST_PREFIX, short, full)?;
         }
 
@@ -169,7 +173,7 @@ mod generate {
             repr: &str,
             names: Vec<(&str, &str)>,
         ) -> Result<(), std::io::Error> {
-            as_enum.write_all(b"#[derive(Copy, Clone, Eq, PartialEq, Hash)]")?;
+            as_enum.write_all(b"#[derive(Copy, Clone, PartialEq, Eq, Hash)]")?;
             as_enum.write_all(
                 b"#[cfg_attr(feature = \"serde\", derive(serde::Serialize, serde::Deserialize))]",
             )?;
@@ -222,8 +226,7 @@ mod generate {
             as_enum.write_all(b"#[derive(Debug)]")?;
             write_enum(&mut as_enum, "DrmVendor", "u8", vendor_names)?;
 
-            // modifiers can overlap
-
+            // Unknown() can overlap, making derived Eq "incorrect"
             as_enum.write_all(b"#[derive(Debug, Copy, Clone)]")?;
             as_enum.write_all(
                 b"#[cfg_attr(feature = \"serde\", derive(serde::Serialize, serde::Deserialize))]",
@@ -232,7 +235,8 @@ mod generate {
 
             let modifier_members: Vec<(String, String)> = modifier_names
                 .iter()
-                .map(|(_, short)| {
+                .filter(|(_, _, alias)| alias.is_none())
+                .map(|(_, short, _)| {
                     (
                         enum_member_case(short),
                         format!("consts::{}{}", CONST_PREFIX, short),
@@ -242,11 +246,23 @@ mod generate {
             for (member, _) in &modifier_members {
                 writeln!(as_enum, "{},", member)?;
             }
-            as_enum.write_all(b"Unrecognized(u64)")?;
+            as_enum.write_all(b"Unrecognized(u64),")?;
 
             as_enum.write_all(b"}\n")?;
 
+            as_enum.write_all(b"#[allow(non_upper_case_globals)]\n")?;
             as_enum.write_all(b"impl DrmModifier {\n")?;
+            for (_, short, alias) in &modifier_names {
+                if let Some(alias) = alias {
+                    writeln!(
+                        as_enum,
+                        "pub const {}: Self = Self::{};\n",
+                        enum_member_case(short),
+                        enum_member_case(alias),
+                    )?;
+                }
+            }
+
             as_enum.write_all(b"pub(crate) fn from_u64(n: u64) -> Self {\n")?;
             as_enum.write_all(b"#[allow(unreachable_patterns)]\n")?;
             as_enum.write_all(b"match n {\n")?;
@@ -254,7 +270,7 @@ mod generate {
             for (member, value) in &modifier_members {
                 writeln!(as_enum, "{} => Self::{},", value, member)?;
             }
-            as_enum.write_all(b"x => Self::Unrecognized(x)\n")?;
+            as_enum.write_all(b"x => Self::Unrecognized(x),\n")?;
 
             as_enum.write_all(b"}}\n")?;
             as_enum.write_all(b"pub(crate) fn into_u64(self) -> u64 {\n")?;
